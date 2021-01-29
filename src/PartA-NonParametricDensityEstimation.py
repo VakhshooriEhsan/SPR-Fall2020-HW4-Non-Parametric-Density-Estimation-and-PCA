@@ -38,21 +38,20 @@ h2 = 0.3
 h3 = 0.6
 
 p_KDE = KDE(x1, y1, h3, N, D)
-print(p_KDE)
 
 plt.figure(1)
 plt.plot(x1, y1, '.')
 plt.plot(x2, y2, '.')
 plt.plot(x3, y3, '.')
 
-# plt.figure(2)
-# ax = plt.subplot(111, projection='3d')
-# ax.scatter(x1, y1, p_KDE, '.')
-# ax.scatter(x2, y2, p_KDE, '.')
-# ax.scatter(x3, y3, p_KDE, '.')
+plt.figure(2)
+ax = plt.subplot(111, projection='3d')
+ax.scatter(x1, y1, p_KDE, '.')
+ax.scatter(x2, y2, p_KDE, '.')
+ax.scatter(x3, y3, p_KDE, '.')
 
 plt.figure(3)
 plt.hist(p_KDE, bins=25, alpha=0.7)
-# plt.hist(x2, bins=25, alpha=0.7)
-# plt.hist(x3, bins=25, alpha=0.7)
+plt.hist(x2, bins=25, alpha=0.7)
+plt.hist(x3, bins=25, alpha=0.7)
 plt.show()
