@@ -1,12 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-def K(u):
-    for i in range(len(u)):
-        if(abs(u[i])>=0.5):
-            return 0
-    return 1
-
 def KDE(x, y, h, N, D):
     p_KDE = np.zeros(N)
     k=0
@@ -28,8 +22,7 @@ def Parzen_windows(x, y, X, Y):
     p = np.zeros((len(x), len(y)))
     for i in range(len(x)):
         for j in range(len(y)):
-            for n in range(len(X)):
-                p[i][j] += K([(x[i]-X[n])/h, (y[j]-Y[n])/h])
+            p[i][j] = np.sum(np.logical_and(np.abs((X-x[i])/h)<0.5, np.abs((Y-y[j])/h)<0.5))
     p = p/(len(X)*h**2)
     return p
 
@@ -106,9 +99,13 @@ def plting(X, Y, h, fun):
 
     fig = plt.figure()
     ax = fig.gca(projection='3d')
-    ax.scatter(x, y, p0)
-    ax.scatter(x, y, p1)
-    ax.scatter(x, y, p2)
+    ax.scatter(x, y, p0, label='class_1')
+    ax.scatter(x, y, p1, label='class_2')
+    ax.scatter(x, y, p2, label='class_3')
+    ax.set_xlabel('x')
+    ax.set_ylabel('y')
+    ax.set_zlabel('P')
+    plt.legend()
 
 # ----------------------------------------------------------------------------
 N = 500 # number of examples
@@ -125,14 +122,16 @@ mean = [5, 3]
 cov = [[2, 1], [1, 2]]
 x3, y3 = np.random.multivariate_normal(mean, cov, N).T
 
-# plt.figure()
-# plt.plot(x1, y1, '.', label='class_1')
-# plt.plot(x2, y2, '.', label='class_2')
-# plt.plot(x3, y3, '.', label='class_3')
-# plt.title('Datasets')
-# plt.xlabel('x')
-# plt.ylabel('y')
-# plt.legend()
+# plot Datasets:
+plt.figure()
+plt.plot(x1, y1, '.', label='class_1')
+plt.plot(x2, y2, '.', label='class_2')
+plt.plot(x3, y3, '.', label='class_3')
+plt.title('Datasets')
+plt.xlabel('x')
+plt.ylabel('y')
+plt.legend()
+plt.show()
 
 # ----------------------------------------------------------------------------
 X = np.concatenate(([x1], [x2], [x3]), axis=0)
@@ -142,33 +141,57 @@ h1 = 0.09
 h2 = 0.3
 h3 = 0.6
 
-# plting(X, Y, h1, Histogram)
-# plting(X, Y, h2, Histogram)
-# plting(X, Y, h3, Histogram)
+# plot Histogram:
+plting(X, Y, h1, Histogram)
+plting(X, Y, h2, Histogram)
+plting(X, Y, h3, Histogram)
+plt.show()
 
-# plting(X, Y, h1, Parzen_windows)
-# plting(X, Y, h2, Parzen_windows)
-# plting(X, Y, h3, Parzen_windows)
+# plot Parzen_windows:
+plting(X, Y, h1, Parzen_windows)
+plting(X, Y, h2, Parzen_windows)
+plting(X, Y, h3, Parzen_windows)
+plt.show()
 
-# sigma = 0.2
-# plting(X, Y, h3, Gaussian_kernel)
-# sigma = 0.6
-# plting(X, Y, h3, Gaussian_kernel)
-# sigma = 0.9
-# plting(X, Y, h3, Gaussian_kernel)
+# plot Gaussian_kernel:
+sigma = 0.2
+plting(X, Y, h1, Gaussian_kernel)
+plting(X, Y, h2, Gaussian_kernel)
+plting(X, Y, h3, Gaussian_kernel)
+sigma = 0.6
+plting(X, Y, h1, Gaussian_kernel)
+plting(X, Y, h2, Gaussian_kernel)
+plting(X, Y, h3, Gaussian_kernel)
+sigma = 0.9
+plting(X, Y, h1, Gaussian_kernel)
+plting(X, Y, h2, Gaussian_kernel)
+plting(X, Y, h3, Gaussian_kernel)
+plt.show()
 
-# fork = 1
-# plting(X, Y, h3, KNN)
-# fork = 9
-# plting(X, Y, h3, KNN)
-# fork = 99
-# plting(X, Y, h3, KNN)
+#plot KNN:
+fork = 1
+plting(X, Y, h1, KNN)
+plting(X, Y, h2, KNN)
+plting(X, Y, h3, KNN)
+fork = 9
+plting(X, Y, h1, KNN)
+plting(X, Y, h2, KNN)
+plting(X, Y, h3, KNN)
+fork = 99
+plting(X, Y, h1, KNN)
+plting(X, Y, h2, KNN)
+plting(X, Y, h3, KNN)
+plt.show()
 
-# best value for h:
-# sigma = 0.6
-# best_h = 1.06*sigma*N**(-1.0/5)
-# plting(X, Y, h3, Gaussian_kernel)
+# plot best value for h:
+sigma = 0.6
+best_h = 1.06*sigma*N**(-1.0/5)
+print("Best value for h:")
+print(best_h)
+plting(X, Y, h3, Gaussian_kernel)
+plt.show()
 
+# plot:
 train_x1 = x1[:int(N*0.9)]
 train_y1 = y1[:int(N*0.9)]
 train_x2 = x2[:int(N*0.9)]
@@ -201,33 +224,34 @@ T3 = len(test_x3[p3_3 >= np.maximum(p3_1, p3_2)])
 print("accuracies:")
 print((T1+T2+T3)/150)
 
-# plt.figure()
-# plt.plot(train_x1, train_y1, '.', label='class_1')
-# plt.plot(train_x2, train_y2, '.', label='class_2')
-# plt.plot(train_x3, train_y3, '.', label='class_3')
-# plt.title('Train_datasets')
-# plt.xlabel('x')
-# plt.ylabel('y')
-# plt.legend()
-# plt.figure()
-# plt.plot(test_x1, test_y1, '.', label='class_1')
-# plt.plot(test_x2, test_y2, '.', label='class_2')
-# plt.plot(test_x3, test_y3, '.', label='class_3')
-# plt.title('Test_datasets')
-# plt.xlabel('x')
-# plt.ylabel('y')
-# plt.legend()
+plt.figure()
+plt.plot(train_x1, train_y1, '.', label='class_1')
+plt.plot(train_x2, train_y2, '.', label='class_2')
+plt.plot(train_x3, train_y3, '.', label='class_3')
+plt.title('Train_datasets')
+plt.xlabel('x')
+plt.ylabel('y')
+plt.legend()
 
-# plt.figure()
-# plt.plot(test_x1[p1_1 >= np.maximum(p1_2, p1_3)], test_y1[p1_1 >= np.maximum(p1_2, p1_3)], '.', label='Test_datasets class_1 (T)')
-# plt.plot(test_x2[p2_2 >= np.maximum(p2_1, p2_3)], test_y2[p2_2 >= np.maximum(p2_1, p2_3)], '.', label='Test_datasets class_2 (T)')
-# plt.plot(test_x3[p3_3 >= np.maximum(p3_1, p3_2)], test_y3[p3_3 >= np.maximum(p3_1, p3_2)], '.', label='Test_datasets class_3 (T)')
-# plt.plot(test_x1[p1_1 <np.maximum(p1_2, p1_3)], test_y1[p1_1 <np.maximum(p1_2, p1_3)], 'o', label='Test_datasets class_1 (F)')
-# plt.plot(test_x2[p2_2 <np.maximum(p2_1, p2_3)], test_y2[p2_2 <np.maximum(p2_1, p2_3)], 'o', label='Test_datasets class_2 (F)')
-# plt.plot(test_x3[p3_3 <np.maximum(p3_1, p3_2)], test_y3[p3_3 <np.maximum(p3_1, p3_2)], 'o', label='Test_datasets class_3 (F)')
-# plt.title('Gaussian kernel result')
-# plt.xlabel('x')
-# plt.ylabel('y')
-# plt.legend()
+plt.figure()
+plt.plot(test_x1, test_y1, '.', label='class_1')
+plt.plot(test_x2, test_y2, '.', label='class_2')
+plt.plot(test_x3, test_y3, '.', label='class_3')
+plt.title('Test_datasets')
+plt.xlabel('x')
+plt.ylabel('y')
+plt.legend()
+
+plt.figure()
+plt.plot(test_x1[p1_1 >= np.maximum(p1_2, p1_3)], test_y1[p1_1 >= np.maximum(p1_2, p1_3)], '.', label='Test_datasets class_1 (T)')
+plt.plot(test_x2[p2_2 >= np.maximum(p2_1, p2_3)], test_y2[p2_2 >= np.maximum(p2_1, p2_3)], '.', label='Test_datasets class_2 (T)')
+plt.plot(test_x3[p3_3 >= np.maximum(p3_1, p3_2)], test_y3[p3_3 >= np.maximum(p3_1, p3_2)], '.', label='Test_datasets class_3 (T)')
+plt.plot(test_x1[p1_1 <np.maximum(p1_2, p1_3)], test_y1[p1_1 <np.maximum(p1_2, p1_3)], 'o', label='Test_datasets class_1 (F)')
+plt.plot(test_x2[p2_2 <np.maximum(p2_1, p2_3)], test_y2[p2_2 <np.maximum(p2_1, p2_3)], 'o', label='Test_datasets class_2 (F)')
+plt.plot(test_x3[p3_3 <np.maximum(p3_1, p3_2)], test_y3[p3_3 <np.maximum(p3_1, p3_2)], 'o', label='Test_datasets class_3 (F)')
+plt.title('Gaussian kernel result')
+plt.xlabel('x')
+plt.ylabel('y')
+plt.legend()
 
 plt.show()
